@@ -2,6 +2,7 @@
 #include <thread>
 #include "WPILib.h"
 #include <math.h>
+using namespace std;
 
 const double __SPEEDCONSTANT=1.00;
 
@@ -68,7 +69,7 @@ public:
 		motor2.Set(speed);
 	}
 
-	//mutil threads functions
+	//multi threads functions
 	void TeleopPeriodic_Move(){
 		if(!(buttonB)){
 			if((buttonLT>0.02) || (buttonRT>0.02)){
@@ -101,9 +102,9 @@ public:
 	void TeleopPeriodic_Roll(){
 		if(buttonLB || buttonRB){
 			if(buttonLB){
-				roller.Set(1);
+				roller.Set(0.8);
 			}else if(buttonRB){
-				roller.Set(-1);
+				roller.Set(-0.8);
 			}else{
 				roller.Set(0);
 			}
@@ -136,12 +137,10 @@ public:
 		buttonY=stick.GetRawButton(4);
 
 		//init threads
-		std::thread threadMove(TeleopPeriodic_Move);
-		std::thread threadRoll(TeleopPeriodic_Roll);
+		Robot::TeleopPeriodic_Move();
+		Robot::TeleopPeriodic_Roll();
 
 		//call threads
-		threadMove.join();
-		threadRoll.join();
 
 		//printf("Teleop Mode Period: %d\n",counter);
 	}
