@@ -2,6 +2,7 @@
 #include <thread>
 #include "WPILib.h"
 #include <math.h>
+#include <unistd.h>
 using namespace std;
 
 const double __SPEEDCONSTANT=1.00;
@@ -10,7 +11,7 @@ const double __SPEEDCONSTANT=1.00;
 MOTORS DEFINITION
 
       FORWARD
-==================
+======rollerß======
 |3              0|
 |2              1|
 ==================
@@ -21,10 +22,12 @@ class Robot : public IterativeRobot {
 	Joystick stick;
 	Talon motor0,motor1,motor2,motor3;
 	Talon roller;
+	LiveWindow *lw=LiveWindow::GetInstance();
 	int counter;
 	double x,y,buttonLT,buttonRT;
 	bool buttonLB,buttonRB;
 	bool buttonA,buttonB,buttonX,buttonY;
+	time_t autoStartTime;
 
 public:
 	Robot():
@@ -71,7 +74,7 @@ public:
 
 	//multi threads functions
 	void TeleopPeriodic_Move(){
-		if(!(buttonB)){
+		if(!(buttonX)){
 			if((buttonLT>0.02) || (buttonRT>0.02)){
 				printf("turn rounds\n");
 				if(buttonLT>=buttonRT){
@@ -94,7 +97,7 @@ public:
 				resetMotors();
 			}
 		}else{
-			printf("Emergency STOP!\n");
+			printf("reset motors\n");
 			resetMotors();
 		}
 	}
@@ -115,11 +118,13 @@ public:
 
 	//driver station functions
 	void RobotInit(){
+		resetMotors();
 		printf("Robot Loaded!\n");
 	}
 
 	void TeleopInit(){
 		counter=0;
+		resetMotors();
 		printf("Teleop Mode Entered!\n");
 	}
 
@@ -129,35 +134,48 @@ public:
 		y=stick.GetRawAxis(1);
 		buttonLT=stick.GetRawAxis(2);
 		buttonRT=stick.GetRawAxis(3);
-		buttonLB=stick.GetRawButton(5);
-		buttonRB=stick.GetRawButton(6);
 		buttonA=stick.GetRawButton(1);
 		buttonB=stick.GetRawButton(2);
 		buttonX=stick.GetRawButton(3);
 		buttonY=stick.GetRawButton(4);
+		buttonLB=stick.GetRawButton(5);
+		buttonRB=stick.GetRawButton(6);
 
-		//init threads
 		Robot::TeleopPeriodic_Move();
 		Robot::TeleopPeriodic_Roll();
-
-		//call threads
 
 		//printf("Teleop Mode Period: %d\n",counter);
 	}
 
 	void AutonomousInit(){
+		resetMotors();
 		counter=0;
+		//time(&autoStartTime);
+		controlMainMotors(0.8);
+		sleep(2.9);
+		resetMotors();
+		sleep(0.1);
+		controlMainMotors(-0.8);
+		sleep(2.9);
+		resetMotors();
+		sleep(0.1);
+		controlMainMotors(0.8);
+		sleep(2.9);
+		resetMotors();
+		sleep(0.1);
+		controlMainMotors(-0.8);
+		sleep(2.9);
+		resetMotors();
+		sleep(0.1);
 		printf("Autonomous Mode Entered!\n");
 	}
 
 	void AutonomousPeriodic(){
-		motor0.Set(0.233);
-		motor1.Set(0.233);
-		motor2.Set(0.3);
-		motor3.Set(0.3);
+		turnRounds(0.666);
 	}
 
 	void TestInit(){
+		resetMotors();
 		printf("Test Mode Entered!\n");
 	}
 
